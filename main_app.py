@@ -29,7 +29,7 @@ if submit:
 
         # Check if the image size is greater than 256x256
         if opencv_image.shape[0] > 256 or opencv_image.shape[1] > 256:
-            st.error("Choose a valid image with a size of 256x256 or smaller.")
+            st.error("Choose a valid image")
         else:
             # Displaying the image
             st.image(opencv_image, channels="BGR")
