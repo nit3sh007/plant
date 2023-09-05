@@ -14,6 +14,9 @@ CLASS_NAMES = ['Corn-Common_rust', 'Potato-Early_blight', 'Tomato-Bacterial_spot
 #Setting Title of App
 st.title("Plant Disease Detection")
 st.markdown("Upload an image of the plant leaf")
+link='sample data [link](https://drive.google.com/drive/folders/1jmDFUaKS-MEmOtBWnIoPJZtLOUFW_xmd?usp=sharing)'
+st.markdown(link,unsafe_allow_html=True)
+
 
 #Uploading the dog image
 plant_image = st.file_uploader("Choose an image...", type="jpg")
