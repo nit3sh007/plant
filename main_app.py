@@ -22,7 +22,6 @@ plant_image = st.file_uploader("Choose an image...", type="jpg")
 submit = st.button('Predict')
 
 #On predict button click
-# On predict button click
 if submit:
     if plant_image is not None:
         # Convert the file to an opencv image.
@@ -45,7 +44,11 @@ if submit:
         opencv_image = np.expand_dims(opencv_image, axis=0)
 
         # Make Prediction
-        Y_pred = model.predict(opencv_image)
+        @tf.function(autograph=False)
+        def predict_with_autograph_disabled(model, image):
+            return model.predict(image)
+
+        Y_pred = predict_with_autograph_disabled(model, opencv_image)
         result_index = np.argmax(Y_pred)
 
         # Check if the result index is within bounds
