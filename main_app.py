@@ -3,7 +3,6 @@ import numpy as np
 import streamlit as st
 import cv2
 from keras.models import load_model
-import tensorflow as tf
 
 #Loading the Model
 model = load_model('plant1.h5')
@@ -17,11 +16,11 @@ link='sample data [link](https://drive.google.com/drive/folders/1jmDFUaKS-MEmOtB
 st.markdown(link,unsafe_allow_html=True)
 
 
-#Uploading the dog image
+# Uploading the plant image
 plant_image = st.file_uploader("Choose an image...", type="jpg")
 submit = st.button('Predict')
 
-#On predict button click
+# On predict button click
 if submit:
     if plant_image is not None:
         # Convert the file to an opencv image.
@@ -44,11 +43,7 @@ if submit:
         opencv_image = np.expand_dims(opencv_image, axis=0)
 
         # Make Prediction
-        @tf.function(autograph=False)
-        def predict_with_autograph_disabled(model, image):
-            return model.predict(image)
-
-        Y_pred = predict_with_autograph_disabled(model, opencv_image)
+        Y_pred = model.predict(opencv_image)
         result_index = np.argmax(Y_pred)
 
         # Check if the result index is within bounds
