@@ -1,62 +1,50 @@
-# Library imports
-import numpy as np
 import streamlit as st
-import cv2
-from keras.models import load_model
+from PIL import Image
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.applications.efficientnet import preprocess_input
 
-try:
-  # Loading the Model
-  model = load_model('plant1.h5')
-except:
-  st.error("Error loading the model. Please check the model file and ensure it is valid and compatible with the current environment.")
+# Load the trained model
+model_path = "plant1.h5"
+loaded_model = tf.keras.models.load_model(model_path)
 
-# Name of Classes
-CLASS_NAMES = ['Apple___Apple_scab','Apple___Black_rot','Apple___Cedar_apple_rust','Apple___healthy','Corn_(maize)___Common_rust_']
+# Load the class dictionary
+class_dict_path = "Disease-class_dict.csv"
+class_dict = {}
+with open(class_dict_path, 'r') as file:
+    lines = file.readlines()[1:]
+    for line in lines:
+        index, plant_class, _, _ = line.strip().split(',')
+        class_dict[int(index)] = plant_class
 
-# Setting Title of App
-st.title("Plant Disease Detection")
-st.markdown("Upload an image of the plant leaf")
-link='sample data [link](https://drive.google.com/drive/folders/1jmDFUaKS-MEmOtBWnIoPJZtLOUFW_xmd?usp=sharing)'
-st.markdown(link,unsafe_allow_html=True)
+def preprocess_image(img):
+    img = img.resize((224, 224))
+    img_array = image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = preprocess_input(img_array)
+    return img_array
 
-# Uploading the plant image
-plant_image = st.file_uploader("Choose an image...", type="jpg")
-submit = st.button('Predict')
+def predict_disease(img):
+    img_array = preprocess_image(img)
+    predictions = loaded_model.predict(img_array)
+    predicted_class = class_dict[np.argmax(predictions)]
+    return predicted_class
 
-# On predict button click
-if submit:
-    if plant_image is not None:
-        try:
-            # Convert the file to an opencv image.
-            file_bytes = np.asarray(bytearray(plant_image.read()), dtype=np.uint8)
-            opencv_image = cv2.imdecode(file_bytes, 1)
+def main():
+    st.title("Plant Disease Classification App")
 
-            # Check if the image size is greater than 256x256
-            if opencv_image.shape[0] > 256 or opencv_image.shape[1] > 256:
-                st.warning("Image size is greater than 256x256. Resizing...")
-                opencv_image = cv2.resize(opencv_image, (256, 256))
+    uploaded_file = st.file_uploader("Choose an image...", type="jpg")
 
-            # Displaying the image
-            st.image(opencv_image, channels="BGR")
-            st.write(opencv_image.shape)
+    if uploaded_file is not None:
+        # Display the uploaded image
+        image_display = Image.open(uploaded_file)
+        st.image(image_display, caption="Uploaded Image.", use_column_width=True)
 
-            # Resizing the image
-            opencv_image = cv2.resize(opencv_image, (256, 256))
+        # Make predictions
+        if st.button("Predict Disease"):
+            disease = predict_disease(image_display)
+            st.success(f"Predicted Disease: {disease}")
 
-            # Convert image to 4 Dimension
-            opencv_image = np.expand_dims(opencv_image, axis=0)
-
-            # Make Prediction
-            Y_pred = model.predict(opencv_image)
-            result_index = np.argmax(Y_pred)
-
-            # Check if the result index is within bounds
-            if 0 <= result_index < len(CLASS_NAMES):
-                result = CLASS_NAMES[result_index]
-                st.title(f"This is {result} leaf")
-            else:
-                st.warning("Invalid result index.")
-        except Exception as e:
-            st.error("Error during prediction:", e)
-    else:
-        st.warning("Please upload an image before clicking Predict.")
+if __name__ == "__main__":
+    main()
