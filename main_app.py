@@ -9,8 +9,7 @@ from keras.models import load_model
 model = load_model('plant1.h5')
 
 #Name of Classes
-CLASS_NAMES = ['Apple___Apple_scab','Apple___Black_rot','Apple___Cedar_apple_rust','Apple___healthy','Potato___Early_blight','Corn_(maize)___Common_rust','Tomato___Bacterial_spot']
-
+CLASS_NAMES = ['Apple___Apple_scab','Apple___Black_rot','Apple___Cedar_apple_rust','Apple___healthy','Corn_(maize)___Common_rust_'
 
 #Setting Title of App
 st.title("Plant Disease Detection")
